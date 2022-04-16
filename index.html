@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+<style>
+    #password, #regenerate-button {
+        display: block;
+        width: 80%;
+    }
+    #password {
+        padding: 0.5em;
+        background-color: #faf3dc;
+        font-family: Lucida Bright, Lucida Fax, serif;
+        font-size: 1.5em;
+        border-style: 5px solid;
+        border: 1px solid #555;
+    }
+    #regenerate-button {
+        background-color: #cfcfcf;
+        cursor: pointer;
+        margin: 1em 0;
+        padding: 1em;
+        font-size: 1em;
+        border: 0;
+    }
+    fieldset {
+        width: 80%;
+        font-size: 1em;
+    }
+    #symbol-text {
+        width: 20em;
+    }
+    fieldset input {
+        padding: 0.5em;
+    }
+</style>
+<script>
+    const LOWER_CHAR = "abcdefghijklmnopqrstuvwxyz";
+    const UPPER_CHAR = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const NUMBER_CHAR = "0123456789";
+    const SYMBOL_CHAR = "!$%&'*+.:;=?@\\/^_`|~-.,#<>()[]{}";
+
+    String.prototype.random = function (len) {
+        var r = "";
+        if (len === undefined) {
+            let arr = this.split('');
+            arr.sort(() => Math.random() - 0.5);
+            r = arr.join('');
+        } else {
+            for (var i = 0; i < len; i++) {
+                r += this.charAt(Math.floor(Math.random() * this.length));
+            }
+        }
+        return r;
+    };
+
+    function generatePassword ({totalLen = 4, upperLen = 1, lowerLen = 1, numberLen = 1, symbolLen = 1, symbolChar = SYMBOL_CHAR}) {
+        let char = "";
+        char += (upperLen > 0)? UPPER_CHAR : "";
+        char += (lowerLen > 0)? LOWER_CHAR : "";
+        char += (numberLen > 0)? NUMBER_CHAR : "";
+        char += (symbolLen > 0)? symbolChar : "";
+        let r = char.random(totalLen - upperLen - lowerLen - numberLen - symbolLen);
+        r += UPPER_CHAR.random(upperLen);
+        r += LOWER_CHAR.random(lowerLen);
+        r += NUMBER_CHAR.random(numberLen);
+        r += symbolChar.random(symbolLen);
+        return r.random();
+    }
+</script>
+</head>
+<body>
+<header>
+    <h1>Password Generator</h1>
+    <input type="text" id="password" name="password" placeholder="password...">
+    <button id="regenerate-button">Regenerate</button>
+</header>
+<fieldset id="options">
+    <legend>Options</legend>
+    <div>
+        <label for="length">length</label>
+        <input type="number" id="length" name="length" min="0" max="256" value="12">
+    </div>
+    <span>
+        <input type="checkbox" id="uppercase" name="uppercase" checked>
+        <label for="uppercase">A-Z</label>
+    </span>
+    <span>
+        <input type="checkbox" id="lowercase" name="lowercase" checked>
+        <label for="lowercase">a-z</label>
+    </span>
+    <span>
+        <input type="checkbox" id="number" name="number" checked>
+        <label for="number">0-9</label>
+    </span>
+    <div>
+        <input type="checkbox" id="symbol" name="symbol">
+        <input type="text" id="symbol-text" name="symbol-text" disabled>
+    </div>
+</fieldset>
+
+<script>
+    var $password = document.getElementById('password');
+    var $regenerateButton = document.getElementById('regenerate-button');
+    var $length = document.getElementById('length');
+    var $uppercase = document.getElementById('uppercase');
+    var $lowercase = document.getElementById('lowercase');
+    var $number = document.getElementById('number');
+    var $symbol = document.getElementById('symbol');
+    var $symbolText = document.getElementById('symbol-text');
+
+    function viewPassword () {
+        $password.value = generatePassword({
+            totalLen: $length.value,
+            upperLen: ($uppercase.checked)? 3 : 0,
+            lowerLen: ($lowercase.checked)? 3 : 0,
+            numberLen: ($number.checked)? 1 : 0,
+            symbolLen: ($symbol.checked)? 1 : 0,
+            symbolChar: ($symbol.checked)? $symbolText.value : ""
+        });
+    }
+
+    //  Generate　Password　Events
+    $regenerateButton.addEventListener('click', viewPassword);
+    document
+        .querySelectorAll("#length, #uppercase, #lowercase, #number, #symbol")
+        .forEach(()=>{ addEventListener('change', viewPassword);});
+
+    $symbol.addEventListener('change',()=>{
+        $symbolText.disabled = !($symbol.checked);
+    });
+
+    //  default　symbol　character
+    document.getElementById('symbol-text').value = SYMBOL_CHAR;
+
+    //  init password
+    viewPassword();
+</script>
+</body>
+</html>
